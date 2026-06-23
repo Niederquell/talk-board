@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f1422">
+<title>Talk Board</title>
+<style>
+  :root{
+    --bg:#0f1422; --panel:#1a2236; --key:#2a3656; --key2:#374673;
+    --text:#f6f9ff; --muted:#9fb0d4; --accent:#5b8cff;
+    --say:#1f7a4d; --warn:#9e2a3a;
+    --letter:9.5vw;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; height:100%; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    overflow:hidden; touch-action:manipulation; user-select:none; -webkit-user-select:none;}
+  body{display:flex; flex-direction:column; height:100dvh;}
+
+  /* Display bar */
+  #display{flex:0 0 auto; min-height:16vh; max-height:30vh; display:flex; align-items:center;
+    justify-content:center; text-align:center; padding:10px 14px; background:var(--panel);
+    border-bottom:3px solid #000; font-weight:800; font-size:8vw; line-height:1.05;
+    overflow-y:auto; word-break:break-word;}
+  #display.flash{animation:flash .3s ease;}
+  @keyframes flash{0%{background:var(--accent);}100%{background:var(--panel);}}
+  #display .hint{color:var(--muted); font-weight:600; font-size:4.4vw;}
+  #display .caret{color:var(--accent);}
+
+  /* Mode toggle */
+  #modes{flex:0 0 auto; display:flex; gap:6px; padding:6px; background:#0a0e18;}
+  .mode{flex:1; padding:12px 6px; border:none; border-radius:12px; background:var(--key);
+    color:var(--muted); font-size:4.6vw; font-weight:800;}
+  .mode.active{background:var(--accent); color:#fff;}
+
+  /* Letter keyboard */
+  #letters{flex:1 1 auto; display:grid; grid-template-columns:repeat(5,1fr); gap:6px;
+    padding:6px; align-content:stretch;}
+  .lk{display:flex; align-items:center; justify-content:center; border:none; border-radius:14px;
+    background:var(--key); color:var(--text); font-size:var(--letter); font-weight:800;
+    line-height:1;}
+  .lk:active{transform:scale(.93); background:var(--key2);}
+  .lk.fn{font-size:4.2vw; background:var(--key2); font-weight:700;}
+  .lk.say{background:var(--say); font-size:4.6vw;}
+  .lk.warn{background:var(--warn); font-size:4.6vw;}
+
+  /* Phrase boards */
+  #phrases{display:none; flex:1 1 auto; flex-direction:column; overflow:hidden;}
+  #tabs{flex:0 0 auto; display:flex; gap:6px; padding:6px; overflow-x:auto; background:#0a0e18;}
+  .tab{flex:1 0 auto; min-width:22vw; padding:12px 6px; border:none; border-radius:12px;
+    background:var(--key); color:var(--muted); font-size:4.2vw; font-weight:700;}
+  .tab.active{background:var(--accent); color:#fff;}
+  #grid{flex:1 1 auto; display:grid; grid-template-columns:repeat(2,1fr); gap:8px; padding:8px;
+    overflow-y:auto; align-content:start;}
+  .tile{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    min-height:18vh; border:none; border-radius:16px; background:var(--key); color:var(--text);
+    font-size:5.6vw; font-weight:800; line-height:1.05; padding:8px; text-align:center;}
+  .tile:active{transform:scale(.95); background:var(--key2);}
+  .tile .emoji{font-size:10vw; line-height:1;}
+  .tile.wide{grid-column:span 2;}
+  .tile.yes{background:var(--say);} .tile.no{background:var(--warn);} .tile.urgent{background:#c2410c;}
+
+  /* Footer */
+  #foot{flex:0 0 auto; display:flex; gap:6px; padding:6px; background:#0a0e18;}
+  #foot button{flex:1; padding:13px 4px; border:none; border-radius:12px; background:var(--key);
+    color:var(--text); font-size:3.6vw; font-weight:700;}
+  #foot button:active{background:var(--key2);}
+  #foot button.on{background:var(--accent); color:#fff;}
+</style>
+</head>
+<body>
+
+<div id="display"><span class="hint">Tap letters to spell — then press Say&nbsp;it</span></div>
+
+<div id="modes">
+  <button class="mode active" id="mLetters" onclick="setMode('letters')">🔠 Letters</button>
+  <button class="mode" id="mPhrases" onclick="setMode('phrases')">💬 Phrases</button>
+</div>
+
+<div id="letters"></div>
+
+<div id="phrases">
+  <div id="tabs"></div>
+  <div id="grid"></div>
+</div>
+
+<div id="foot">
+  <button onclick="repeat()">🔁 Repeat</button>
+  <button onclick="stopSpeak()">⏹ Stop</button>
+  <button onclick="cycleSize()">🔡 Size</button>
+  <button id="echoBtn" class="on" onclick="toggleEcho()">🔊 Letters</button>
+  <button onclick="cycleVoice()">🗣 <span id="voiceName">Voice</span></button>
+</div>
+
+<script>
+/* ---------- Phrase boards ---------- */
+const BOARDS = {
+  "Quick":[
+    {t:"YES",e:"👍",c:"yes"},{t:"NO",e:"👎",c:"no"},
+    {t:"Please come here",e:"🙋",w:true},{t:"I need the nurse",e:"🚨",c:"urgent",w:true},
+    {t:"Wait a moment",e:"✋"},{t:"Thank you",e:"🙏"},
+    {t:"I don't know",e:"🤷"},{t:"Maybe",e:"🤔"},
+  ],
+  "Needs":[
+    {t:"Water",e:"💧"},{t:"I'm thirsty",e:"🥤"},{t:"I'm hungry",e:"🍽️"},{t:"Bathroom",e:"🚻"},
+    {t:"I'm in pain",e:"😣",c:"urgent"},{t:"Medicine",e:"💊"},{t:"Too hot",e:"🥵"},{t:"Too cold",e:"🥶"},
+    {t:"Fix my pillow",e:"🛏️"},{t:"Sit me up",e:"⬆️"},{t:"Lay me down",e:"⬇️"},{t:"Turn me",e:"🔄"},
+    {t:"I'm tired",e:"😴"},{t:"My glasses",e:"👓"},{t:"Turn on the TV",e:"📺"},{t:"Open the blinds",e:"🌤️"},
+  ],
+  "Feel":[
+    {t:"I'm okay",e:"🙂"},{t:"I'm uncomfortable",e:"😖"},{t:"I'm scared",e:"😨"},{t:"I'm frustrated",e:"😤"},
+    {t:"I feel sick",e:"🤢"},{t:"I can't breathe",e:"😮‍💨",c:"urgent"},{t:"I'm dizzy",e:"💫"},{t:"It hurts here",e:"📍"},
+    {t:"Itchy",e:"🖐️"},{t:"Better now",e:"👌"},{t:"Worse",e:"📉"},{t:"I'm happy",e:"😄"},
+  ],
+  "People":[
+    {t:"I love you",e:"❤️",w:true},{t:"Come closer",e:"🤗"},{t:"Hold my hand",e:"🤝"},{t:"Stay with me",e:"💛",w:true},
+    {t:"Call my family",e:"📞"},{t:"I want to rest",e:"🤫"},{t:"Where is everyone?",e:"❓"},{t:"Goodbye",e:"👋"},
+  ],
+};
+
+/* ---------- State ---------- */
+let voices=[], voiceIdx=0, sizeStep=0;
+const letterSizes=["9.5vw","11vw","13vw"];
+let typed="";
+let echo = localStorage.getItem('echo')!=='0';
+let lastSpoken="";
+const display=document.getElementById('display');
+
+/* ---------- Speech ---------- */
+function loadVoices(){
+  let all=speechSynthesis.getVoices();
+  voices=all.filter(v=>v.lang&&v.lang.startsWith('en'));
+  if(!voices.length) voices=all;
+  const s=+localStorage.getItem('voiceIdx');
+  if(!isNaN(s)&&s<voices.length) voiceIdx=s;
+  updateVoiceName();
+}
+function updateVoiceName(){
+  const el=document.getElementById('voiceName');
+  el.textContent=voices[voiceIdx]?(voices[voiceIdx].name.split(' ')[0].slice(0,7)):"Voice";
+}
+speechSynthesis.onvoiceschanged=loadVoices; loadVoices();
+
+function speak(text,rate){
+  try{ speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    if(voices[voiceIdx]) u.voice=voices[voiceIdx];
+    u.rate=rate||0.95; u.pitch=1; u.volume=1; speechSynthesis.speak(u);
+  }catch(e){}
+}
+function speakSentence(text){ lastSpoken=text; speak(text,0.92); }
+function repeat(){ if(lastSpoken) speak(lastSpoken,0.92); }
+function stopSpeak(){ try{speechSynthesis.cancel();}catch(e){} }
+
+/* ---------- Display ---------- */
+function renderTyped(){
+  if(!typed){ display.innerHTML='<span class="hint">Tap letters to spell — then press Say&nbsp;it</span>'; return; }
+  display.textContent=typed;
+}
+function flash(){ display.classList.remove('flash'); void display.offsetWidth; display.classList.add('flash'); }
+
+/* ---------- Letter keyboard ---------- */
+const LETTERS="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+function buildLetters(){
+  const wrap=document.getElementById('letters'); wrap.innerHTML="";
+  LETTERS.forEach(ch=>{
+    const b=document.createElement('button'); b.className='lk'; b.textContent=ch;
+    b.onclick=()=>typeChar(ch); wrap.appendChild(b);
+  });
+  const add=(label,cls,fn)=>{ const b=document.createElement('button'); b.className='lk '+cls;
+    b.textContent=label; b.onclick=fn; wrap.appendChild(b); };
+  add("space","fn",()=>typeChar(" "));
+  add("⌫","fn",delChar);
+  add("clear","fn",clearAll);
+  add("▶ Say it","say",sayTyped);
+}
+function typeChar(ch){
+  typed+=ch; renderTyped();
+  if(echo && ch!==" ") speak(ch==="I"?"eye":ch, 1.05);
+  else if(echo && ch===" ") {}
+}
+function delChar(){ typed=typed.slice(0,-1); renderTyped(); }
+function clearAll(){ typed=""; renderTyped(); }
+function sayTyped(){ if(typed.trim()){ flash(); speakSentence(typed.trim()); } }
+
+/* ---------- Phrase boards ---------- */
+function buildTabs(){
+  const tabs=document.getElementById('tabs'); tabs.innerHTML="";
+  Object.keys(BOARDS).forEach((name,i)=>{
+    const b=document.createElement('button'); b.className='tab'+(i===0?' active':'');
+    b.textContent=name; b.onclick=()=>{ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      b.classList.add('active'); renderBoard(name); }; tabs.appendChild(b);
+  });
+}
+function renderBoard(name){
+  const grid=document.getElementById('grid'); grid.innerHTML="";
+  BOARDS[name].forEach(it=>{
+    const b=document.createElement('button');
+    b.className='tile'+(it.c?' '+it.c:'')+(it.w?' wide':'');
+    b.innerHTML=`<span class="emoji">${it.e||''}</span><span>${it.t}</span>`;
+    b.onclick=()=>{ display.textContent=it.t; flash(); speakSentence(it.t); };
+    grid.appendChild(b);
+  });
+}
+
+/* ---------- Modes ---------- */
+function setMode(m){
+  const isL=m==='letters';
+  document.getElementById('letters').style.display=isL?'grid':'none';
+  document.getElementById('phrases').style.display=isL?'none':'flex';
+  document.getElementById('mLetters').classList.toggle('active',isL);
+  document.getElementById('mPhrases').classList.toggle('active',!isL);
+  if(isL) renderTyped();
+}
+
+/* ---------- Footer ---------- */
+function cycleSize(){ sizeStep=(sizeStep+1)%letterSizes.length;
+  document.documentElement.style.setProperty('--letter',letterSizes[sizeStep]); }
+function toggleEcho(){ echo=!echo; localStorage.setItem('echo',echo?'1':'0');
+  document.getElementById('echoBtn').classList.toggle('on',echo); }
+function cycleVoice(){ if(!voices.length) return; voiceIdx=(voiceIdx+1)%voices.length;
+  localStorage.setItem('voiceIdx',voiceIdx); updateVoiceName(); speak("Hello"); }
+
+/* ---------- Keep screen awake ---------- */
+let wakeLock=null;
+async function keepAwake(){ try{ if('wakeLock' in navigator) wakeLock=await navigator.wakeLock.request('screen'); }catch(e){} }
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') keepAwake(); });
+
+/* ---------- Init ---------- */
+buildLetters(); buildTabs(); renderBoard(Object.keys(BOARDS)[0]);
+document.getElementById('echoBtn').classList.toggle('on',echo);
+renderTyped();
+document.body.addEventListener('pointerdown',()=>keepAwake(),{once:true});
+</script>
+</body>
+</html>
