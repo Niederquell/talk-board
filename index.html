@@ -43,7 +43,7 @@
   .mode.active{background:var(--accent); color:#000; border-color:var(--accent);}
 
   /* Letter keyboard */
-  #letters{flex:1 1 auto; display:grid; grid-template-columns:repeat(5,1fr); gap:6px;
+  #letters{flex:1 1 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:6px;
     padding:6px; align-content:stretch;}
   .lk{display:flex; align-items:center; justify-content:center; border:2px solid var(--border);
     border-radius:14px; background:var(--key); color:#fff; font-size:var(--letter); font-weight:900;
@@ -51,6 +51,7 @@
   .lk:active{transform:scale(.93); background:var(--key2);}
   .lk.fn{font-size:4.6vw; background:#000; font-weight:800;}
   .lk.span2{grid-column:span 2;}
+  .lk.span4{grid-column:span 4;}
 
   /* Phrase boards */
   #phrases{display:none; flex:1 1 auto; flex-direction:column; overflow:hidden;}
@@ -147,7 +148,7 @@ function buildLetters(){
   const add=(label,cls,fn)=>{ const b=document.createElement('button'); b.className='lk '+cls;
     b.textContent=label; b.onclick=fn; wrap.appendChild(b); };
   add("space","fn span2",()=>typeChar(" "));
-  add("clear","fn span2",clearAll);
+  add("clear","fn span4",clearAll);
 }
 function typeChar(ch){ typed+=ch; renderTyped(); }
 function delChar(){ typed=typed.slice(0,-1); renderTyped(); }
