@@ -148,7 +148,6 @@ function buildLetters(){
   const add=(label,cls,fn)=>{ const b=document.createElement('button'); b.className='lk '+cls;
     b.textContent=label; b.onclick=fn; wrap.appendChild(b); };
   add("space","fn span2",()=>typeChar(" "));
-  add("clear","fn span4",clearAll);
 }
 function typeChar(ch){ typed+=ch; renderTyped(); }
 function delChar(){ typed=typed.slice(0,-1); renderTyped(); }
