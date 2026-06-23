@@ -31,6 +31,13 @@
   #display .hint{color:var(--muted); font-weight:600; font-size:4.4vw;}
   #display .caret{color:var(--accent);}
 
+  /* Big backspace bar at top */
+  #topback{flex:0 0 auto; display:flex; align-items:center; justify-content:center; gap:14px;
+    width:100%; min-height:12vh; border:none; border-bottom:3px solid #000; background:#b45309;
+    color:#fff; font-size:9vw; font-weight:800; line-height:1;}
+  #topback:active{background:#c4670c;}
+  #topback .lbl{font-size:4.6vw; font-weight:800; letter-spacing:1px;}
+
   /* Mode toggle */
   #modes{flex:0 0 auto; display:flex; gap:6px; padding:6px; background:#0a0e18;}
   .mode{flex:1; padding:12px 6px; border:none; border-radius:12px; background:var(--key);
@@ -45,6 +52,7 @@
     line-height:1;}
   .lk:active{transform:scale(.93); background:var(--key2);}
   .lk.fn{font-size:4.2vw; background:var(--key2); font-weight:700;}
+  .lk.space2{grid-column:span 2;}
   .lk.say{background:var(--say); font-size:4.6vw;}
   .lk.warn{background:var(--warn); font-size:4.6vw;}
 
@@ -75,6 +83,8 @@
 <body>
 
 <div id="display"><span class="hint">Tap letters to spell — then press Say&nbsp;it</span></div>
+
+<button id="topback" onclick="delChar()">⌫<span class="lbl">DELETE</span></button>
 
 <div id="modes">
   <button class="mode active" id="mLetters" onclick="setMode('letters')">🔠 Letters</button>
@@ -173,8 +183,7 @@ function buildLetters(){
   });
   const add=(label,cls,fn)=>{ const b=document.createElement('button'); b.className='lk '+cls;
     b.textContent=label; b.onclick=fn; wrap.appendChild(b); };
-  add("space","fn",()=>typeChar(" "));
-  add("⌫","fn",delChar);
+  add("space","fn space2",()=>typeChar(" "));
   add("clear","fn",clearAll);
   add("▶ Say it","say",sayTyped);
 }
@@ -214,6 +223,7 @@ function setMode(m){
   document.getElementById('phrases').style.display=isL?'none':'flex';
   document.getElementById('mLetters').classList.toggle('active',isL);
   document.getElementById('mPhrases').classList.toggle('active',!isL);
+  document.getElementById('topback').style.display=isL?'flex':'none';
   if(isL) renderTyped();
 }
 
