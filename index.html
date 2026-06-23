@@ -7,6 +7,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Talk Board</title>
 <style>
   :root{
@@ -198,6 +201,21 @@ document.documentElement.style.setProperty('--letter',letterSizes[sizeStep]);
 buildLetters(); buildTabs(); renderBoard(Object.keys(BOARDS)[0]);
 renderTyped();
 document.body.addEventListener('pointerdown',()=>keepAwake(),{once:true});
+
+/* ---------- Auto-update: reload when a new version takes over ---------- */
+if('serviceWorker' in navigator){
+  let refreshing=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    if(refreshing) return; refreshing=true; window.location.reload();
+  });
+  navigator.serviceWorker.register('sw.js').then(reg=>{ reg.update(); })
+    .catch(()=>{});
+  /* check for updates whenever the board is reopened */
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible')
+      navigator.serviceWorker.getRegistration().then(r=>{ if(r) r.update(); });
+  });
+}
 </script>
 </body>
 </html>
