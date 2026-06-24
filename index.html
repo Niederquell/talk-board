@@ -46,8 +46,8 @@
   .mode.active{background:var(--accent); color:#000; border-color:var(--accent);}
 
   /* Letter keyboard */
-  #letters{flex:1 1 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:6px;
-    padding:6px; align-content:stretch;}
+  #letters{flex:1 1 auto; min-height:0; overflow-y:auto; display:grid;
+    grid-template-columns:repeat(4,1fr); gap:6px; padding:6px; align-content:stretch;}
   .lk{display:flex; align-items:center; justify-content:center; border:2px solid var(--border);
     border-radius:14px; background:var(--key); color:#fff; font-size:var(--letter); font-weight:900;
     line-height:1;}
