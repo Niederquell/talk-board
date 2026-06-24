@@ -48,8 +48,8 @@
   #settingsPanel h2{margin:0 0 4px; font-size:6vw; text-align:center;}
   .setLabel{color:var(--muted); font-size:4vw; font-weight:700;}
   .setRow{display:flex; gap:10px;}
-  .setRow button{flex:1; padding:18px; border:2px solid var(--border); border-radius:12px;
-    background:var(--bg); color:var(--text); font-size:4.8vw; font-weight:800;}
+  .setRow button{flex:1; padding:20px; border:2px solid var(--border); border-radius:12px;
+    background:var(--bg); color:var(--text); font-size:6.4vw; font-weight:800;}
   .setRow button.sel{background:var(--accent); color:#000; border-color:var(--accent);}
   #settingsPanel select{width:100%; padding:14px; border:2px solid var(--border); border-radius:12px;
     background:var(--bg); color:var(--text); font-size:4.4vw; font-weight:700;}
@@ -120,13 +120,13 @@
     <h2>Settings</h2>
     <div class="setLabel">Appearance</div>
     <div class="setRow">
-      <button id="setDark" onclick="setTheme('dark')">🌙 Dark</button>
-      <button id="setLight" onclick="setTheme('light')">☀️ Light</button>
+      <button id="setDark" onclick="setTheme('dark')">Dark</button>
+      <button id="setLight" onclick="setTheme('light')">Light</button>
     </div>
     <div class="setLabel">Speech (read aloud)</div>
     <div class="setRow">
-      <button id="setSpeechOff" onclick="setSpeech(false)">🔇 Off</button>
-      <button id="setSpeechOn" onclick="setSpeech(true)">🔊 On</button>
+      <button id="setSpeechOff" onclick="setSpeech(false)">Off</button>
+      <button id="setSpeechOn" onclick="setSpeech(true)">On</button>
     </div>
     <div class="setLabel">Voice</div>
     <select id="setVoice" onchange="setVoice(this.value)"></select>
@@ -247,9 +247,9 @@ function closeSettings(){ document.getElementById('settings').classList.remove('
 
 /* ---------- Speech (text-to-speech) — optional, for blind/low-vision users ---------- */
 const TTS = ('speechSynthesis' in window);
-const DEFAULT_RATE = 0.8;          /* 20% slower than normal speech */
+const DEFAULT_RATE = 0.65;         /* the speed Mike dialed in on the slider */
 const LETTER_RATE  = 0.95;
-const SETTINGS_V   = '3';          /* bump to push new voice/speed defaults to existing devices */
+const SETTINGS_V   = '4';          /* bump to push new voice/speed defaults to existing devices */
 
 /* one-time migration: reset to the new curated defaults once */
 if(localStorage.getItem('settingsV')!==SETTINGS_V){
