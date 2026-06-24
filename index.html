@@ -72,7 +72,7 @@
   .tile.wide{grid-column:span 2;}
 
   /* Footer */
-  #foot{flex:0 0 auto; display:flex; gap:6px; padding:6px; background:#000;}
+  #foot{flex:0 0 auto; display:flex; gap:6px; padding:6px; padding-bottom:calc(6px + env(safe-area-inset-bottom)); background:#000;}
   #foot button{flex:1; padding:16px 4px; border:2px solid var(--border); border-radius:12px;
     background:#000; color:var(--text); font-size:4.4vw; font-weight:800;}
   #foot button:active{background:var(--key2);}
@@ -98,7 +98,6 @@
 
 <div id="foot">
   <button onclick="clearAll()">🧹 CLEAR ALL</button>
-  <button onclick="cycleSize()">🔡 SIZE</button>
 </div>
 
 <script>
