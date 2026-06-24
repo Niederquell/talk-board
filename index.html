@@ -247,17 +247,41 @@ function closeSettings(){ document.getElementById('settings').classList.remove('
 
 /* ---------- Speech (text-to-speech) — optional, for blind/low-vision users ---------- */
 const TTS = ('speechSynthesis' in window);
+const DEFAULT_RATE = 0.8;          /* 20% slower than normal speech */
+const LETTER_RATE  = 0.95;
+const SETTINGS_V   = '3';          /* bump to push new voice/speed defaults to existing devices */
+
+/* one-time migration: reset to the new curated defaults once */
+if(localStorage.getItem('settingsV')!==SETTINGS_V){
+  localStorage.removeItem('rate'); localStorage.removeItem('voiceName');
+  localStorage.setItem('settingsV', SETTINGS_V);
+}
+
 let speech = localStorage.getItem('speech')==='1';
 let voices=[];
 let voiceName = localStorage.getItem('voiceName') || '';
-let rate = parseFloat(localStorage.getItem('rate')); if(!(rate>0)) rate=0.55;  /* sentences ~40% slower than before */
-const LETTER_RATE = 0.95;
+let rate = parseFloat(localStorage.getItem('rate')); if(!(rate>0)) rate=DEFAULT_RATE;
 
+/* Apple/Google expose many robotic + novelty voices — hide them, keep real human ones. */
+const NOVELTY = /albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|pipe|superstar|trinoids|whisper|wobble|zarvox|deranged|hysterical|princess|junior|ralph|fred|kathy|grandma|grandpa|eddy|flo|reed|rocko|sandy|shelley|googlebot/i;
+/* preferred natural-sounding human voices, best first */
+const PREF = ['samantha','ava','allison','alex','tom','evan','nathan','susan','zoe','joelle','nicky','aaron','daniel','karen','moira','tessa','serena','arthur','martha','stephanie','matilda','oliver','gordon','catherine'];
+function voiceScore(v){
+  const n=(v.name||'').toLowerCase(); let s=0;
+  if(/siri/.test(n)) s+=200;
+  if(/(enhanced|premium|natural|neural)/.test(n)) s+=100;
+  const i=PREF.findIndex(p=>n.includes(p)); if(i>=0) s += (PREF.length - i);
+  return s;
+}
 function loadVoices(){
   if(!TTS) return;
   const all=speechSynthesis.getVoices();
-  voices=all.filter(v=>v.lang && v.lang.startsWith('en')); if(!voices.length) voices=all;
-  if(!voiceName && voices[0]) voiceName=voices[0].name;
+  let en=all.filter(v=>v.lang && v.lang.toLowerCase().startsWith('en'));
+  let good=en.filter(v=>!NOVELTY.test(v.name||''));
+  if(!good.length) good = en.length ? en : all;
+  good.sort((a,b)=>voiceScore(b)-voiceScore(a));
+  voices=good;
+  if(!voiceName || !voices.find(v=>v.name===voiceName)) voiceName = voices[0] ? voices[0].name : '';
   buildVoiceOptions();
 }
 if(TTS){ speechSynthesis.onvoiceschanged=loadVoices; loadVoices(); }
