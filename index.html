@@ -206,7 +206,7 @@ function renderBoard(name){
     const b=document.createElement('button');
     b.className='tile';
     b.innerHTML=`<span class="emoji">${it.e||''}</span><span>${it.t}</span>`;
-    b.onclick=()=>{ display.textContent=it.t; flash(); speak(it.t,0.92); };
+    b.onclick=()=>{ display.textContent=it.t; flash(); speak(it.t.toLowerCase(),0.92); };
     grid.appendChild(b);
   });
 }
@@ -252,7 +252,7 @@ function speak(text,rate){
   }catch(e){}
 }
 function speakLetter(ch){ if(ch===' ') return; speak(ch==='I'?'eye':ch, 1.05); }
-function speakTyped(){ if(typed.trim()) speak(typed.trim(), 0.92); }
+function speakTyped(){ if(typed.trim()) speak(typed.trim().toLowerCase(), 0.92); }
 function updateSpeechBtns(){
   const on=document.getElementById('setSpeechOn'), off=document.getElementById('setSpeechOff');
   if(on&&off){ on.classList.toggle('sel',speech); off.classList.toggle('sel',!speech); }
