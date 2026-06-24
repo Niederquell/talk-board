@@ -168,7 +168,7 @@ function renderBoard(name){
   const grid=document.getElementById('grid'); grid.innerHTML="";
   BOARDS[name].forEach(it=>{
     const b=document.createElement('button');
-    b.className='tile'+(it.w?' wide':'');
+    b.className='tile';
     b.innerHTML=`<span class="emoji">${it.e||''}</span><span>${it.t}</span>`;
     b.onclick=()=>{ display.textContent=it.t; flash(); };
     grid.appendChild(b);
