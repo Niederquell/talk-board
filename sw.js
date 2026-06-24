@@ -1,7 +1,7 @@
 /* Talk Board service worker — network-first so updates always show,
    cache only as an offline fallback. VERSION is bumped on every deploy
    (see deploy.sh), which clears all older caches on activate. */
-const VERSION = 'v1782310674';
+const VERSION = 'v1782311058';
 const CACHE = 'talkboard-' + VERSION;
 
 self.addEventListener('install', (e) => {
