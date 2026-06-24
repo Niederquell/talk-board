@@ -14,8 +14,12 @@
 <style>
   :root{
     --bg:#000; --key:#161616; --key2:#333; --border:#5a5a5a;
-    --text:#fff; --muted:#cfcfcf; --accent:#ffd400; --del:#ff7a00;
+    --text:#fff; --muted:#cfcfcf; --accent:#ffd400; --del:#ff7a00; --flash:#222;
     --letter:13vw;
+  }
+  body.light{
+    --bg:#ffffff; --key:#eeeeee; --key2:#d6d6d6; --border:#8a8a8a;
+    --text:#000; --muted:#555; --accent:#f5c400; --del:#ff7a00; --flash:#e6e6e6;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0; height:100%; background:var(--bg); color:var(--text);
@@ -25,12 +29,30 @@
 
   /* Display bar */
   #display{flex:0 0 auto; min-height:16vh; max-height:30vh; display:flex; align-items:center;
-    justify-content:center; text-align:center; padding:10px 14px; background:#000;
+    justify-content:center; text-align:center; padding:10px 14px; background:var(--bg);
     border-bottom:3px solid var(--border); font-weight:900; font-size:9vw; line-height:1.05;
-    overflow-y:auto; word-break:break-word; color:#fff;}
+    overflow-y:auto; word-break:break-word; color:var(--text);}
   #display.flash{animation:flash .25s ease;}
-  @keyframes flash{0%{background:#222;}100%{background:#000;}}
+  @keyframes flash{0%{background:var(--flash);}100%{background:var(--bg);}}
   #display .hint{color:var(--muted); font-weight:700; font-size:5vw;}
+
+  /* Hamburger settings button (sits in the mode row) */
+  .mode.menu{flex:0 0 auto; width:15vw; max-width:74px; font-size:7vw; padding:14px 0;}
+
+  /* Settings overlay */
+  #settings{position:fixed; inset:0; z-index:100; display:none; padding:20px;
+    background:rgba(0,0,0,.75); align-items:center; justify-content:center;}
+  #settings.open{display:flex;}
+  #settingsPanel{width:100%; max-width:440px; background:var(--key); border:2px solid var(--border);
+    border-radius:18px; padding:18px; display:flex; flex-direction:column; gap:14px; color:var(--text);}
+  #settingsPanel h2{margin:0 0 4px; font-size:6vw; text-align:center;}
+  .setLabel{color:var(--muted); font-size:4vw; font-weight:700;}
+  .setRow{display:flex; gap:10px;}
+  .setRow button{flex:1; padding:18px; border:2px solid var(--border); border-radius:12px;
+    background:var(--bg); color:var(--text); font-size:4.8vw; font-weight:800;}
+  .setRow button.sel{background:var(--accent); color:#000; border-color:var(--accent);}
+  #settings .close{padding:18px; border:none; border-radius:12px; background:var(--accent);
+    color:#000; font-size:5.2vw; font-weight:900; margin-top:6px;}
 
   /* Big DELETE bar at top */
   #topback{flex:0 0 auto; display:flex; align-items:center; justify-content:center; gap:12px;
@@ -40,8 +62,8 @@
   #topback .lbl{font-size:4.2vw; font-weight:900; letter-spacing:2px;}
 
   /* Mode toggle */
-  #modes{flex:0 0 auto; display:flex; gap:6px; padding:6px; background:#000;}
-  .mode{flex:1; padding:14px 6px; border:2px solid var(--border); border-radius:12px; background:#000;
+  #modes{flex:0 0 auto; display:flex; gap:6px; padding:6px; background:var(--bg);}
+  .mode{flex:1; padding:14px 6px; border:2px solid var(--border); border-radius:12px; background:var(--bg);
     color:var(--text); font-size:5vw; font-weight:900;}
   .mode.active{background:var(--accent); color:#000; border-color:var(--accent);}
 
@@ -49,24 +71,24 @@
   #letters{flex:1 1 auto; min-height:0; overflow-y:auto; display:grid;
     grid-template-columns:repeat(4,1fr); gap:6px; padding:6px; align-content:stretch;}
   .lk{display:flex; align-items:center; justify-content:center; border:2px solid var(--border);
-    border-radius:14px; background:var(--key); color:#fff; font-size:var(--letter); font-weight:900;
+    border-radius:14px; background:var(--key); color:var(--text); font-size:var(--letter); font-weight:900;
     line-height:1;}
   .lk:active{transform:scale(.93); background:var(--key2);}
-  .lk.fn{font-size:4.6vw; background:#000; font-weight:800;}
+  .lk.fn{font-size:4.6vw; background:var(--bg); font-weight:800;}
   .lk.span2{grid-column:span 2;}
   .lk.span4{grid-column:span 4;}
 
   /* Phrase boards */
   #phrases{display:none; flex:1 1 auto; flex-direction:column; overflow:hidden;}
-  #tabs{flex:0 0 auto; display:flex; gap:6px; padding:6px; overflow-x:auto; background:#000;}
+  #tabs{flex:0 0 auto; display:flex; gap:6px; padding:6px; overflow-x:auto; background:var(--bg);}
   .tab{flex:1 0 auto; min-width:22vw; padding:14px 6px; border:2px solid var(--border); border-radius:12px;
-    background:#000; color:var(--text); font-size:4.6vw; font-weight:800;}
+    background:var(--bg); color:var(--text); font-size:4.6vw; font-weight:800;}
   .tab.active{background:var(--accent); color:#000; border-color:var(--accent);}
   #grid{flex:1 1 auto; display:grid; grid-template-columns:repeat(2,1fr); gap:8px; padding:8px;
     overflow-y:auto; align-content:start;}
   .tile{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
     min-height:18vh; border:2px solid var(--border); border-radius:16px; background:var(--key);
-    color:#fff; font-size:6vw; font-weight:900; line-height:1.05; padding:8px; text-align:center;}
+    color:var(--text); font-size:6vw; font-weight:900; line-height:1.05; padding:8px; text-align:center;}
   .tile:active{transform:scale(.95); background:var(--key2);}
   .tile .emoji{font-size:11vw; line-height:1;}
   .tile.wide{grid-column:span 2;}
@@ -80,14 +102,32 @@
 </head>
 <body>
 
-<div id="display"><span class="hint">Tap letters to spell</span></div>
+<div id="display" onclick="speakTyped()"><span class="hint">Tap letters to spell</span></div>
 
 <div id="modes">
+  <button class="mode menu" id="mMenu" onclick="openSettings()">☰</button>
   <button class="mode active" id="mLetters" onclick="setMode('letters')">LETTERS</button>
   <button class="mode" id="mPhrases" onclick="setMode('phrases')">PHRASES</button>
 </div>
 
 <button id="topback" onclick="delChar()">⌫<span class="lbl">DELETE</span></button>
+
+<div id="settings" onclick="if(event.target===this)closeSettings()">
+  <div id="settingsPanel">
+    <h2>Settings</h2>
+    <div class="setLabel">Appearance</div>
+    <div class="setRow">
+      <button id="setDark" onclick="setTheme('dark')">🌙 Dark</button>
+      <button id="setLight" onclick="setTheme('light')">☀️ Light</button>
+    </div>
+    <div class="setLabel">Speech (read aloud)</div>
+    <div class="setRow">
+      <button id="setSpeechOff" onclick="setSpeech(false)">🔇 Off</button>
+      <button id="setSpeechOn" onclick="setSpeech(true)">🔊 On</button>
+    </div>
+    <button class="close" onclick="closeSettings()">Done</button>
+  </div>
+</div>
 
 <div id="letters"></div>
 
@@ -147,7 +187,7 @@ function buildLetters(){
     b.textContent=label; b.onclick=fn; wrap.appendChild(b); };
   add("space","fn span2",()=>typeChar(" "));
 }
-function typeChar(ch){ typed+=ch; renderTyped(); }
+function typeChar(ch){ typed+=ch; renderTyped(); speakLetter(ch); }
 function delChar(){ typed=typed.slice(0,-1); renderTyped(); }
 function clearAll(){ typed=""; renderTyped(); }
 
@@ -166,7 +206,7 @@ function renderBoard(name){
     const b=document.createElement('button');
     b.className='tile';
     b.innerHTML=`<span class="emoji">${it.e||''}</span><span>${it.t}</span>`;
-    b.onclick=()=>{ display.textContent=it.t; flash(); };
+    b.onclick=()=>{ display.textContent=it.t; flash(); speak(it.t,0.92); };
     grid.appendChild(b);
   });
 }
@@ -186,6 +226,39 @@ function setMode(m){
 function cycleSize(){ sizeStep=(sizeStep+1)%letterSizes.length;
   document.documentElement.style.setProperty('--letter',letterSizes[sizeStep]); }
 
+/* ---------- Theme + settings ---------- */
+function applyTheme(t){
+  document.body.classList.toggle('light', t==='light');
+  const m=document.querySelector('meta[name=theme-color]'); if(m) m.content = t==='light' ? '#ffffff' : '#000000';
+  const d=document.getElementById('setDark'), l=document.getElementById('setLight');
+  if(d&&l){ d.classList.toggle('sel', t!=='light'); l.classList.toggle('sel', t==='light'); }
+}
+let theme = (localStorage.getItem('theme')==='light') ? 'light' : 'dark';
+function setTheme(t){ theme=t; localStorage.setItem('theme',t); applyTheme(t); }
+function openSettings(){ document.getElementById('settings').classList.add('open'); }
+function closeSettings(){ document.getElementById('settings').classList.remove('open'); }
+
+/* ---------- Speech (text-to-speech) — optional, for blind/low-vision users ---------- */
+const TTS = ('speechSynthesis' in window);
+let speech = localStorage.getItem('speech')==='1';
+let voices=[];
+function loadVoices(){ if(!TTS) return; const all=speechSynthesis.getVoices();
+  voices=all.filter(v=>v.lang && v.lang.startsWith('en')); if(!voices.length) voices=all; }
+if(TTS){ speechSynthesis.onvoiceschanged=loadVoices; loadVoices(); }
+function speak(text,rate){
+  if(!speech || !TTS || !text) return;
+  try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text);
+    if(voices[0]) u.voice=voices[0]; u.rate=rate||0.95; u.pitch=1; u.volume=1; speechSynthesis.speak(u);
+  }catch(e){}
+}
+function speakLetter(ch){ if(ch===' ') return; speak(ch==='I'?'eye':ch, 1.05); }
+function speakTyped(){ if(typed.trim()) speak(typed.trim(), 0.92); }
+function updateSpeechBtns(){
+  const on=document.getElementById('setSpeechOn'), off=document.getElementById('setSpeechOff');
+  if(on&&off){ on.classList.toggle('sel',speech); off.classList.toggle('sel',!speech); }
+}
+function setSpeech(v){ speech=v; localStorage.setItem('speech', v?'1':'0'); updateSpeechBtns(); if(v) speak('Speech on',1); }
+
 /* ---------- Keep screen awake ---------- */
 let wakeLock=null;
 async function keepAwake(){ try{ if('wakeLock' in navigator) wakeLock=await navigator.wakeLock.request('screen'); }catch(e){} }
@@ -195,6 +268,7 @@ document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==
 document.documentElement.style.setProperty('--letter',letterSizes[sizeStep]);
 buildLetters(); buildTabs(); renderBoard(Object.keys(BOARDS)[0]);
 renderTyped();
+applyTheme(theme); updateSpeechBtns();
 document.body.addEventListener('pointerdown',()=>keepAwake(),{once:true});
 
 /* ---------- Auto-update: reload when a new version takes over ---------- */
